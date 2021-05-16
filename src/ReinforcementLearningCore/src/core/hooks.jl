@@ -12,7 +12,7 @@ export AbstractHook,
     UploadTrajectoryEveryNStep,
     MultiAgentHook
 
-using UnicodePlots:lineplot
+using UnicodePlots: lineplot
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -151,7 +151,14 @@ function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
 end
 
 function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
-    println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
+    println(
+        lineplot(
+            hook.rewards,
+            title = "Total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
+        ),
+    )
 end
 
 #####

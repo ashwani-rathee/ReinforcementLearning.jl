@@ -11,10 +11,7 @@ open(joinpath(@__DIR__, "..", "README.md"), "r") do f_src
     end
 end
 
-assets = [
-    "assets/favicon.ico",
-    "assets/custom.css",
-]
+assets = ["assets/favicon.ico", "assets/custom.css"]
 
 makedocs(
     modules = [

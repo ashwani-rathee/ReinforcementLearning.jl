@@ -22,7 +22,6 @@ include("open_spiel/open_spiel.jl")
 include("gridworlds/gridworlds.jl")
 
 # dynamic loading environments
-function __init__()
-end
+function __init__() end
 
 end # module

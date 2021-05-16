@@ -28,12 +28,11 @@ function Experiment(
 
     create_policy_net() = NeuralNetworkApproximator(
         model = GaussianNetwork(
-            pre = Chain(
-                Dense(ns, 30, relu), 
-                Dense(30, 30, relu),
-            ),
+            pre = Chain(Dense(ns, 30, relu), Dense(30, 30, relu)),
             μ = Chain(Dense(30, na, init = init)),
-            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            logσ = Chain(
+                Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init),
+            ),
         ),
         optimizer = ADAM(0.003),
     )
@@ -85,7 +84,8 @@ function Experiment(
                     entropy_term = agent.policy.entropy_term,
                 )
                 if is_terminated(env)
-                    @info "training" reward = total_reward_per_episode.reward log_step_increment = 0
+                    @info "training" reward = total_reward_per_episode.reward log_step_increment =
+                        0
                 end
             end
         end,

@@ -6,8 +6,8 @@ using InteractiveUtils
 
 # ╔═╡ dccad7c8-62fb-11eb-226f-393c73301bcb
 begin
-	using Dates
-	using Pkg
+    using Dates
+    using Pkg
 end
 
 # ╔═╡ 5938a9a6-6099-11eb-1ac9-1fb12d9c9237
@@ -20,7 +20,7 @@ using Random
 using Plots
 
 # ╔═╡ ac7e107c-609b-11eb-2d50-4b50517e1840
-using Flux:InvDecay
+using Flux: InvDecay
 
 # ╔═╡ bed48ef6-62fb-11eb-327a-ed29787dda3c
 md"""
@@ -71,7 +71,7 @@ named `LotteryEnv`:
 
 # ╔═╡ d4d6a2e0-6099-11eb-10ad-dd67c607ea0a
 Base.@kwdef mutable struct LotteryEnv <: AbstractEnv
-    reward::Union{Nothing, Int} = nothing
+    reward::Union{Nothing,Int} = nothing
 end
 
 # ╔═╡ dee89ee4-6099-11eb-2c5a-9d05e6c4eb86
@@ -89,11 +89,11 @@ Here `RLBase` is just an alias for `ReinforcementLearningBase`.
 
 # ╔═╡ 0f0ec27e-609a-11eb-3557-031e6004e78a
 begin
-	RLBase.reward(env::LotteryEnv) = env.reward
-	RLBase.state(env::LotteryEnv) = !isnothing(env.reward)
-	RLBase.state_space(env::LotteryEnv) = [false, true]
-	RLBase.is_terminated(env::LotteryEnv) = !isnothing(env.reward)
-	RLBase.reset!(env::LotteryEnv) = env.reward = nothing
+    RLBase.reward(env::LotteryEnv) = env.reward
+    RLBase.state(env::LotteryEnv) = !isnothing(env.reward)
+    RLBase.state_space(env::LotteryEnv) = [false, true]
+    RLBase.is_terminated(env::LotteryEnv) = !isnothing(env.reward)
+    RLBase.reset!(env::LotteryEnv) = env.reward = nothing
 end
 
 # ╔═╡ 1ba95468-609a-11eb-1678-8bd0f3906606
@@ -157,7 +157,7 @@ also work. Similar to the test above, let's try the `RandomPolicy` first:
 """
 
 # ╔═╡ b67979f0-609a-11eb-1efd-bb1407e6affc
-run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000)) 
+run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000))
 
 # ╔═╡ fc508c3e-609a-11eb-2b19-df3956c2fc7d
 md"""
@@ -168,9 +168,9 @@ episode to see the performance of the `RandomPolicy`.
 
 # ╔═╡ 04299018-609b-11eb-185e-83b941aa7462
 begin
-	hook = TotalRewardPerEpisode()
-	run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000), hook)
-	plot(hook.rewards)
+    hook = TotalRewardPerEpisode()
+    run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000), hook)
+    plot(hook.rewards)
 end
 
 # ╔═╡ a07eed5a-609b-11eb-2bbb-f318c9a796b5
@@ -183,13 +183,13 @@ appropriate algorithms based on the problem you're dealing with.)
 # ╔═╡ b443632a-609b-11eb-3976-5d199171c779
 p = QBasedPolicy(
     learner = MonteCarloLearner(;
-            approximator=TabularQApproximator(
-                ;n_state = length(state_space(env)),
-                n_action = length(action_space(env)),
-                opt = InvDecay(1.0)
-            )
+        approximator = TabularQApproximator(;
+            n_state = length(state_space(env)),
+            n_action = length(action_space(env)),
+            opt = InvDecay(1.0),
         ),
-    explorer = EpsilonGreedyExplorer(0.1)
+    ),
+    explorer = EpsilonGreedyExplorer(0.1),
 )
 
 # ╔═╡ b9ebd5aa-609b-11eb-11cc-739730e6208e
@@ -236,12 +236,9 @@ by others and it's not very easy to modify the code directly. Fortunatelly, some
 
 # ╔═╡ 03eebcc6-609c-11eb-352c-398708e60ec3
 wrapped_env = ActionTransformedEnv(
-    StateOverriddenEnv(
-        env,
-        s -> s ? 1 : 2
-    ),
+    StateOverriddenEnv(env, s -> s ? 1 : 2),
     action_space_mapping = _ -> Base.OneTo(3),
-    action_mapping = i -> action_space(env)[i]
+    action_mapping = i -> action_space(env)[i],
 )
 
 # ╔═╡ 13535078-609c-11eb-0a3a-873d4d82a3b4
@@ -254,9 +251,9 @@ Nice job! Now we are ready to run the experiment:
 
 # ╔═╡ 4108c73c-609c-11eb-19ff-af4e1641eb8a
 begin
-	h = TotalRewardPerEpisode()
-	run(p, wrapped_env, StopAfterEpisode(1_000), h)
-	plot(h.rewards)
+    h = TotalRewardPerEpisode()
+    run(p, wrapped_env, StopAfterEpisode(1_000), h)
+    plot(h.rewards)
 end
 
 # ╔═╡ 59f80b90-609c-11eb-30ef-776f1154d897
@@ -273,19 +270,16 @@ Well, actually the policy is running in the **evaluation** mode here. We'll expl
 """
 
 # ╔═╡ c4e97848-609d-11eb-0e9d-dda4843007bd
-agent = Agent(;
-	policy=p,
-	trajectory=VectorSARTTrajectory()
-)
+agent = Agent(; policy = p, trajectory = VectorSARTTrajectory())
 
 # ╔═╡ d6575e4c-609d-11eb-01be-63f485339089
 new_hook = TotalRewardPerEpisode()
 
 # ╔═╡ a4a1e976-609d-11eb-01aa-b32b0af8e34d
-run(agent, wrapped_env, StopAfterStep(100_000), new_hook)	
+run(agent, wrapped_env, StopAfterStep(100_000), new_hook)
 
 # ╔═╡ 6c707936-609e-11eb-02dd-f14440c00c2f
-p.learner.approximator.table  
+p.learner.approximator.table
 
 # ╔═╡ 642b61fc-609c-11eb-23a4-25002f4a0bd3
 md"""
@@ -315,7 +309,8 @@ Note that every state style may have different representations, `String`, `Array
 """
 
 # ╔═╡ 12fa94ec-60b0-11eb-0bd7-a5da4368db56
-RLBase.state(::Observation{String}, env::LotteryEnv) = is_terminated(env) ? "Game Over" : "Game Start"
+RLBase.state(::Observation{String}, env::LotteryEnv) =
+    is_terminated(env) ? "Game Over" : "Game Start"
 
 # ╔═╡ 43d13376-60b0-11eb-3f05-8f50e494764b
 md"""
